@@ -1,6 +1,8 @@
 module.exports.TypeUsers = function TypeUsers() {
     return {
-        "intitule": String,
-        "flag": true
+        intitule: String,
+        describe: String,
+        icon: String,
+        flag: true
     }
 }

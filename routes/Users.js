@@ -74,6 +74,7 @@ router.get('/NumberUserByType', (req, res) => {
     })
 })
 
+//Définir l'identité du user
 router.post('/setIdentity', (req, res) => {
     var entity = require("../models/entities/Users").Identity(),
         objetRetour = require("./ObjetRetour").ObjetRetour();
@@ -81,6 +82,7 @@ router.post('/setIdentity', (req, res) => {
     entity.name = req.body.nom;
     entity.postName = req.body.postnom;
     entity.lastName = req.body.prenom;
+    entity.phoneNumber = req.body.numero;
     entity.id_user = req.body.id_user;
 
     model.initialize(db);

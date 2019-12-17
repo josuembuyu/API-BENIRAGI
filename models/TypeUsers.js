@@ -7,23 +7,10 @@ var collection = {
 //Pour initialisation
 module.exports.initialize = (db) => {
 
-    collection.value = db.get().collection("typeUsers");
+    collection.value = db.get().collection("TypeUsers");
 }
 
-module.exports.create = (new_type_user, callback) => {
-    try {
-        collection.value.insertOne(new_type_user, (err, result) => {
-            if (err) {
-                callback(false, "Une erreur de type : " + err)
-            } else {
-                callback(true, "Enregistrer avec succès", result.ops[0])
-            }
-        })
-    } catch (exception) {
-        callback(false, "Une exception sur le type : " + exception)
-    }
-}
-
+//Récupération des types des utilisateurs
 module.exports.getAll = (callback) => {
     try {
         collection.value.aggregate([
@@ -35,7 +22,9 @@ module.exports.getAll = (callback) => {
             {
                 "$project": {
                     "_id": 1,
-                    "intitule": 1
+                    "intitule": 1,
+                    "describe": 1,
+                    "icon": 1
                 }
             }
         ]).toArray((err, resultAggr) => {
@@ -79,6 +68,7 @@ module.exports.findOne = (id, callback) => {
     }
 }
 
+//Détermine le types d'un user
 module.exports.isEmployer = (id, callback) => {
     try {
         collection.value.aggregate([

@@ -1,15 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
-var model = require("../models/TypeUsers");
-var db = require("../models/db");
+var db = require("../models/db"),
+    model = require("../models/Jobs");
 
-//Récupération de type des users
-router.get('/getAll', (req, res) => {
+router.get("/get/:limit", (req, res) => {
     var objetRetour = require("./ObjetRetour").ObjetRetour();
 
     model.initialize(db);
-    model.getAll((isGet, message, result) => {
+    model.getJobs(limit, (isGet, message, result) => {
         objetRetour.getEtat = isGet;
         objetRetour.getMessage = message;
         objetRetour.getObjet = result;

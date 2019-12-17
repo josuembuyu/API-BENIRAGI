@@ -24,6 +24,11 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/Users');
 var typeUsersRouter = require('./routes/TypeUsers');
 var codeRouter = require('./routes/Code');
+var jobsRouter = require('./routes/Jobs');
+
+//For admin
+var jobsAdminRouter = require("./routes/admin/Jobs");
+var typeUsersAdminRouter = require("./routes/admin/TypeUsers");
 
 var app = express();
 
@@ -41,6 +46,11 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/type_users', typeUsersRouter);
 app.use('/code', codeRouter);
+app.use('/jobs', jobsRouter);
+
+//For admin
+app.use('/admin/jobs', jobsAdminRouter);
+app.use('/admin/type_users', typeUsersAdminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

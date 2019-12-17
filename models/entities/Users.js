@@ -14,6 +14,7 @@ module.exports.Identity = function Identity() {
         name: String,
         lastName: String,
         postName: String,
+        phoneNumber: String,
         created_at: new Date() 
     }
 }
