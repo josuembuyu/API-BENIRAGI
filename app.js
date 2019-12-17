@@ -23,6 +23,7 @@ db.connect(string_con, (isConnected, resultConnect) => {
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/Users');
 var typeUsersRouter = require('./routes/TypeUsers');
+var codeRouter = require('./routes/Code');
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/type_users', typeUsersRouter);
+app.use('/code', codeRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

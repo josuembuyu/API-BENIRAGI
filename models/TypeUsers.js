@@ -103,3 +103,37 @@ module.exports.isEmployer = (id, callback) => {
         callback(false, "Une exception de détermination : " + exception)
     }
 }
+
+//Récupère le type de l'utilisateur
+module.exports.getTypeForUser = (obj, callback) => {
+    try {
+        collection.value.aggregate([
+            {
+                "$match": {
+                    "_id": require("mongodb").ObjectId(obj.id_type)
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "intitule": 1
+                }
+            }
+        ]).toArray((err, resultAggr) => {
+            if (err) {
+                callback(false, "Une erreur lors de la récupération du type de l'utilisateur : " +err)
+            } else {
+                if (resultAggr.length > 0) {
+                    delete obj.id_type;
+
+                    obj.typeUser = resultAggr[0].intitule;
+                    callback(true, `L'utilisateur existe en tant que ${obj.typeUser}`, obj)
+                } else {
+                    callback(false, "Pas de type pour cela")
+                }
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la récupération du type de l'utilisateur : " + exception)
+    }
+}

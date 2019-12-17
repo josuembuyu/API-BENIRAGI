@@ -1,4 +1,4 @@
-var db_js = require("./db");
+var db = require("./db");
 
 var collection = {
     value: null
@@ -33,5 +33,43 @@ module.exports.generate = function (user, callback) {
         })
     } catch (exception) {
         callback(false, "Une exception a été lévée lors de la génération du code de confirmation : " + exception)
+    }
+}
+
+
+module.exports.activateAccount = (obj, callback) => {
+    try {
+        collection.value.aggregate([
+            {
+                "$match": {
+                    "id_user": obj.id_user,
+                    "code": parseInt(obj.code)
+                }
+            }
+        ]).toArray((err, resultAggr) => {
+            if (err) {
+                callback(false, "Une erreur lors de l'activation du compte : " + err)
+            } else {
+                if (resultAggr.length > 0) {
+
+                    if (parseInt(obj.code) == resultAggr[resultAggr.length - 1].code) {
+                        var users = require("./Users");
+
+                        users.initialize(db);
+                        users.activateAccount(obj, (isActivate, message, resultActivate) => {
+                            callback(isActivate, message, resultActivate)
+                        })
+                        
+                    } else {
+                        callback(false, "Votre code ne correspond pas au dernier code envoyé")
+                    }
+
+                } else {
+                    callback(false, "Aucun code pour lui")
+                }
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée de l'activation du compte : " + exception)
     }
 }

@@ -149,3 +149,67 @@ function sendCode(account, callback) {
 
     })
 }
+
+//Récupère les details pour un user
+module.exports.findOneById = (id, callback) => {
+    try {
+        collection.value.aggregate([
+            {
+                "$match": {
+                    "_id": require("mongodb").ObjectId(id),
+                    "flag": true
+                }
+            }
+        ]).toArray((err, resultAggr) => {
+            if (err) {
+                callback(false, "Une erreur de recherche de type : " + err)
+            } else {
+                if (resultAggr.length > 0) {
+                    var type = require("./TypeUsers");
+
+                    type.initialize(db);
+                    type.getTypeForUser(obj, (isGet, message, resultWithType) => {
+                        if (isGet) {
+                            callback(true, message, resultWithType)
+                        } else {
+                            callback(false, "Pas de type défini, ça nous impossible de vous donner les détails")
+                        }
+                    })
+                } else {
+                    callback(false, "Ce user n'existe pas ou n'est pas autorisé")
+                }
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception de recherche de user : " + exception)
+    }
+}
+
+//Module d'activation du compte
+module.exports.activateAccount = (obj, callback) => {
+    try {
+        var filter = {
+                "_id": require("mongodb").ObjectId(obj.id_user)
+            },
+            update = {
+                "$set": {
+                    "visibility": true,
+                    "flag": true
+                }
+            };
+
+            collection.value.updateOne(filter, update, (err, result) => {
+                if (err) {
+                    callback(false, "Une erreur lors de la mise à jour du flag du user: " +err)
+                } else {
+                    if (result) {
+                        callback(true, "Le compte a été activé", result)
+                    } else {
+                        callback(false, "Aucune mise à jour")
+                    }
+                }
+            })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée de la mise à jour du flag du user: " + exception)
+    }
+}

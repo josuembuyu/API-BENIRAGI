@@ -4,7 +4,7 @@ module.exports.Users = function Users() {
         password: String,
         id_type: String,
         flag: false,
-        visibility: true,
+        visibility: false,
         created_at: new Date()
     }
 }
