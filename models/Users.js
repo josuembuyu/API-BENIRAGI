@@ -168,7 +168,7 @@ module.exports.findOneById = (id, callback) => {
                     var type = require("./TypeUsers");
 
                     type.initialize(db);
-                    type.getTypeForUser(obj, (isGet, message, resultWithType) => {
+                    type.getTypeForUser(resultAggr[0], (isGet, message, resultWithType) => {
                         if (isGet) {
                             callback(true, message, resultWithType)
                         } else {
@@ -211,5 +211,106 @@ module.exports.activateAccount = (obj, callback) => {
             })
     } catch (exception) {
         callback(false, "Une exception a été lévée de la mise à jour du flag du user: " + exception)
+    }
+}
+
+module.exports.login = (obj, callback) => {
+    try {
+        collection.value.aggregate([{
+            "$match": {
+                "email": obj.email
+            }
+        },
+        {
+            "$project": {
+                "password": 1,
+                "id_type": 1
+            }
+        }
+        ]).toArray(function (errAggr, resultAggr) {
+
+            if (errAggr) {
+                callback(false, "Une erreur est survenue lors de la connexion de l'utilisateur : " + errAggr);
+            } else {
+
+                if (resultAggr.length > 0) {
+
+                    var clearPwd = "Beniragi" + obj.password + "jach";
+
+                    bcrypt.compare(clearPwd, resultAggr[0].password, function (errCompareCrypt, resultCompareCrypt) {
+
+
+                        if (errCompareCrypt) {
+                            callback(false, "Une erreur est survenue lors du décryptage du mot de passe : " + errCompareCrypt);
+                        } else {
+                            if (resultCompareCrypt) {
+
+                                var id_user = "" + resultAggr[0]._id,
+                                    id_type = resultAggr[0].id_type,
+                                    objetRetour = {
+                                        "id_user": id_user,
+                                        "id_type": id_type
+                                    };
+
+                                var type = require("./TypeUsers");
+
+                                type.initialize(db);
+
+                                //La sauvegarde de la connexion d'un client
+                                type.getTypeForUser(objetRetour, (isGet, message, resultWithType) => {
+                                    if (isGet) {
+                                        callback(true, `Vous êtes connecté en atant que ${resultWithType.typeUser}`, resultWithType)
+                                    } else {
+                                        callback(false, message)
+                                    }
+                                })
+
+                            } else {
+                                callback(false, "Le mot de passe est incorrect");
+                            }
+                        }
+                    });
+
+                } else {
+                    callback(false, "Username incorrect");
+                }
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la connexion du user : " + exception);
+    }
+}
+
+//Définir sa visibilité
+module.exports.toggleVisibility = (id_user, callback) => {
+    try {
+        module.exports.findOneById(id_user, (isFound, message, result) => {
+            if (isFound) {
+                var filter = {
+                        "_id": result._id
+                    },    
+                    update = {
+                        "$set": {
+                            "visibility": result.visibility ? false : true
+                        }
+                    };
+
+                collection.value.updateOne(filter, update, (err, result) => {
+                    if (err) {
+                        callback(false, "Une erreur a été lévée lors de la mise à jour de sa visisbilité : " +err)
+                    } else {
+                        if (result) {
+                            callback(true, "Mise à jour de visibilité effectué", result)
+                        } else {
+                            callback(false, "Aucune mise à jour !")
+                        }
+                    }
+                })
+            } else {
+                callback(false, message)
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la mise à jour de sa visisbilité : " + exception)
     }
 }
