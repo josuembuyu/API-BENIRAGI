@@ -8,3 +8,12 @@ module.exports.Users = function Users() {
         created_at: new Date()
     }
 }
+
+module.exports.Identity = function Identity() {
+    return {
+        name: String,
+        lastName: String,
+        postName: String,
+        created_at: new Date() 
+    }
+}

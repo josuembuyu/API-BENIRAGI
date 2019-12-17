@@ -60,4 +60,37 @@ router.post('/toggleVisibility/:id_user', (req, res) => {
     })
 })
 
+//Récupère le nombre d'utilisateur par type de user
+router.get('/NumberUserByType', (req, res) => {
+    var objetRetour = require("./ObjetRetour").ObjetRetour();
+
+    model.initialize(db);
+    model.getNumberForTypeUser((isGet, message, result) => {
+        objetRetour.getEtat = isGet;
+        objetRetour.getMessage = message;
+        objetRetour.getObjet = result;
+
+        res.status(200).send(objetRetour);
+    })
+})
+
+router.post('/setIdentity', (req, res) => {
+    var entity = require("../models/entities/Users").Identity(),
+        objetRetour = require("./ObjetRetour").ObjetRetour();
+
+    entity.name = req.body.nom;
+    entity.postName = req.body.postnom;
+    entity.lastName = req.body.prenom;
+    entity.id_user = req.body.id_user;
+
+    model.initialize(db);
+    model.setIdentity(entity, (isSet, message, result) => {
+        objetRetour.getEtat = isSet;
+        objetRetour.getMessage = message;
+        objetRetour.getObjet = result;
+
+        res.status(200).send(objetRetour);
+    })
+})
+
 module.exports = router;

@@ -189,8 +189,8 @@ module.exports.findOneById = (id, callback) => {
 module.exports.activateAccount = (obj, callback) => {
     try {
         var filter = {
-                "_id": require("mongodb").ObjectId(obj.id_user)
-            },
+            "_id": require("mongodb").ObjectId(obj.id_user)
+        },
             update = {
                 "$set": {
                     "visibility": true,
@@ -198,17 +198,17 @@ module.exports.activateAccount = (obj, callback) => {
                 }
             };
 
-            collection.value.updateOne(filter, update, (err, result) => {
-                if (err) {
-                    callback(false, "Une erreur lors de la mise à jour du flag du user: " +err)
+        collection.value.updateOne(filter, update, (err, result) => {
+            if (err) {
+                callback(false, "Une erreur lors de la mise à jour du flag du user: " + err)
+            } else {
+                if (result) {
+                    callback(true, "Le compte a été activé", result)
                 } else {
-                    if (result) {
-                        callback(true, "Le compte a été activé", result)
-                    } else {
-                        callback(false, "Aucune mise à jour")
-                    }
+                    callback(false, "Aucune mise à jour")
                 }
-            })
+            }
+        })
     } catch (exception) {
         callback(false, "Une exception a été lévée de la mise à jour du flag du user: " + exception)
     }
@@ -287,8 +287,8 @@ module.exports.toggleVisibility = (id_user, callback) => {
         module.exports.findOneById(id_user, (isFound, message, result) => {
             if (isFound) {
                 var filter = {
-                        "_id": result._id
-                    },    
+                    "_id": result._id
+                },
                     update = {
                         "$set": {
                             "visibility": result.visibility ? false : true
@@ -297,7 +297,7 @@ module.exports.toggleVisibility = (id_user, callback) => {
 
                 collection.value.updateOne(filter, update, (err, result) => {
                     if (err) {
-                        callback(false, "Une erreur a été lévée lors de la mise à jour de sa visisbilité : " +err)
+                        callback(false, "Une erreur a été lévée lors de la mise à jour de sa visisbilité : " + err)
                     } else {
                         if (result) {
                             callback(true, "Mise à jour de visibilité effectué", result)
@@ -312,5 +312,86 @@ module.exports.toggleVisibility = (id_user, callback) => {
         })
     } catch (exception) {
         callback(false, "Une exception a été lévée lors de la mise à jour de sa visisbilité : " + exception)
+    }
+}
+
+//Module permettant la récupération des stats sur le nombres des users par leurs types
+module.exports.getNumberForTypeUser = (callback) => {
+    try {
+        collection.value.aggregate([
+            {
+                "$group": {
+                    "_id": "$id_type",
+                    "count": { "$sum": 1 }
+                }
+            }
+        ]).toArray((err, resultAggr) => {
+            if (err) {
+                callback(false, "Une erreur sur le comptage des types de user : " +err)
+            } else {
+                if (resultAggr.length > 0) {
+                    var sortieUser = 0,
+                        listOut = [],
+                        type = require("./TypeUsers");
+
+                    type.initialize(db);
+                    for (let index = 0; index < resultAggr.length; index++) {
+                        resultAggr[index].id_type = resultAggr[index]._id;
+                        delete resultAggr[index]._id;
+
+                        type.getTypeForUser(resultAggr[index], (isGet, message, resultWithType) => {
+                            sortieUser++;
+                            if (isGet) {
+                                listOut.push(resultWithType)
+                            }
+
+                            if (sortieUser === resultAggr.length) {
+                                callback(true, "Les stats sont prêts", listOut)
+                            }
+                        })
+                    }
+                } else {
+                    callback(false, "Aucun user donc aucune statistique à faire")
+                }
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors du comptage des types de user : " +exception)
+    }
+}
+
+//Définition de l'identité de la personne
+module.exports.setIdentity = (newIdentity, callback) => {
+    try {
+        module.exports.findOneById(newIdentity.id_user, (isFound, message, result) => {
+            if (isFound) {
+                delete newIdentity.id_user;
+                var filter = {
+                        "_id": result._id
+                    },
+                    update = {
+                        "$set": {
+                            "identity": newIdentity 
+                        }
+                    };
+
+                collection.value.updateOne(filter, update, (err, resultUp) => {
+                    if (err) {
+                        callback(false, "Une erreur lors de la mise à jour : " +err)
+                    } else {
+                        if (resultUp) {
+                            callback(true, "La mise à jour a été faites", resultUp)
+                        } else {
+                            callback(false, "Aucune mise à jour")
+                        }
+                    }
+                })
+
+            } else {
+                callback(false, message)
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la mise à jour : " + exception)
     }
 }
