@@ -95,4 +95,22 @@ router.post('/setIdentity', (req, res) => {
     })
 })
 
+//Définir le job du user
+router.post('/setJob', (req, res) => {
+    var entity = require("../models/entities/Users").Job(),
+        objetRetour = require("./ObjetRetour").ObjetRetour();
+
+    entity.id_user = req.body.id_user;
+    entity.id_job = req.body.id_job;
+
+    model.initialize(db);
+    model.setIdentity(entity, (isSet, message, result) => {
+        objetRetour.getEtat = isSet;
+        objetRetour.getMessage = message;
+        objetRetour.getObjet = result;
+
+        res.status(200).send(objetRetour);
+    })
+})
+
 module.exports = router;

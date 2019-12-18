@@ -327,7 +327,7 @@ module.exports.getNumberForTypeUser = (callback) => {
             }
         ]).toArray((err, resultAggr) => {
             if (err) {
-                callback(false, "Une erreur sur le comptage des types de user : " +err)
+                callback(false, "Une erreur sur le comptage des types de user : " + err)
             } else {
                 if (resultAggr.length > 0) {
                     var sortieUser = 0,
@@ -356,7 +356,7 @@ module.exports.getNumberForTypeUser = (callback) => {
             }
         })
     } catch (exception) {
-        callback(false, "Une exception a été lévée lors du comptage des types de user : " +exception)
+        callback(false, "Une exception a été lévée lors du comptage des types de user : " + exception)
     }
 }
 
@@ -367,17 +367,17 @@ module.exports.setIdentity = (newIdentity, callback) => {
             if (isFound) {
                 delete newIdentity.id_user;
                 var filter = {
-                        "_id": result._id
-                    },
+                    "_id": result._id
+                },
                     update = {
                         "$set": {
-                            "identity": newIdentity 
+                            "identity": newIdentity
                         }
                     };
 
                 collection.value.updateOne(filter, update, (err, resultUp) => {
                     if (err) {
-                        callback(false, "Une erreur lors de la mise à jour : " +err)
+                        callback(false, "Une erreur lors de la mise à jour : " + err)
                     } else {
                         if (resultUp) {
                             callback(true, "La mise à jour a été faites", resultUp)
@@ -393,5 +393,51 @@ module.exports.setIdentity = (newIdentity, callback) => {
         })
     } catch (exception) {
         callback(false, "Une exception a été lévée lors de la mise à jour : " + exception)
+    }
+}
+
+//Pour définir le job
+module.exports.setJobs = (newJobs, callback) => {
+    try {
+        module.exports.findOneById(newIdentity.id_user, (isFound, message, result) => {
+            if (isFound) {
+                delete newIdentity.id_user;
+                var jobs = require("./Jobs");
+
+                jobs.initialize(db);
+                jobs.findOneById(newJobs.id_job, (isFound, message, result) => {
+                    if (isFound) {
+                        var filter = {
+                            "_id": result._id
+                        },
+                            update = {
+                                "$set": {
+                                    "jobs": newJobs
+                                }
+                            };
+
+                        collection.value.updateOne(filter, update, (err, resultUp) => {
+                            if (err) {
+                                callback(false, "Une erreur lors de la mise à jour : " + err)
+                            } else {
+                                if (resultUp) {
+                                    callback(true, "La mise à jour a été faites", resultUp)
+                                } else {
+                                    callback(false, "Aucune mise à jour")
+                                }
+                            }
+                        })
+                    } else {
+                        callback(false, message)
+                    }
+                })
+
+
+            } else {
+                callback(false, message)
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception lors de la définiton des jobs : " + exception)
     }
 }

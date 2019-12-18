@@ -18,3 +18,10 @@ module.exports.Identity = function Identity() {
         created_at: new Date() 
     }
 }
+
+module.exports.Job = function Job() {
+    return  {
+        "id_user": String,
+        "id_job": String
+    }
+}

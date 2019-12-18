@@ -17,4 +17,18 @@ router.get("/get/:limit", (req, res) => {
     })
 })
 
+//Permet une search assez intelligente
+router.post('/search', (req, res) => {
+    var objetRetour = require("./ObjetRetour").ObjetRetour();
+
+    model.initialize(db);
+    model.searchJob(req.body.value, (isFound, message, result) => {
+        objetRetour.getEtat = isFound;
+        objetRetour.getMessage = message;
+        objetRetour.getObjet = result;
+
+        res.status(200).send(objetRetour);
+    })
+})
+
 module.exports = router;
