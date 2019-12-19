@@ -399,9 +399,9 @@ module.exports.setIdentity = (newIdentity, callback) => {
 //Pour définir le job
 module.exports.setJobs = (newJobs, callback) => {
     try {
-        module.exports.findOneById(newIdentity.id_user, (isFound, message, result) => {
+        module.exports.findOneById(newJobs.id_user, (isFound, message, result) => {
             if (isFound) {
-                delete newIdentity.id_user;
+                delete newJobs.id_user;
                 var jobs = require("./Jobs");
 
                 jobs.initialize(db);
@@ -439,5 +439,96 @@ module.exports.setJobs = (newJobs, callback) => {
         })
     } catch (exception) {
         callback(false, "Une exception lors de la définiton des jobs : " + exception)
+    }
+}
+
+//Définition de l'avatar
+module.exports.setAvatar = (newAvatar, callback) => {
+    try {
+        module.exports.findOneById(newAvatar.id_user, (isFound, message, result) => {
+            if (isFound) {
+                delete newAvatar.id_user;
+                var media = require("./Media");
+
+                media.initialize(db);
+                media.findOneById(newAvatar.id_media, (isFound, message, result) => {
+                    if (isFound) {
+                        var filter = {
+                            "_id": result._id
+                        },
+                            update = {
+                                "$set": {
+                                    "avatar": newAvatar
+                                }
+                            };
+
+                        collection.value.updateOne(filter, update, (err, resultUp) => {
+                            if (err) {
+                                callback(false, "Une erreur lors de la mise à jour : " + err)
+                            } else {
+                                if (resultUp) {
+                                    callback(true, "La mise à jour a été faites", resultUp)
+                                } else {
+                                    callback(false, "Aucune mise à jour")
+                                }
+                            }
+                        })
+                    } else {
+                        callback(false, message)
+                    }
+                })
+
+
+            } else {
+                callback(false, message)
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la définition de l'avatar : " + exception)
+    }
+}
+
+//Définition des documents
+module.exports.setDocs = (newDocs, callback) => {
+    try {
+        module.exports.findOneById(newDocs.id_user, (isFound, message, result) => {
+            if (isFound) {
+                delete newDocs.id_user;
+                var media = require("./Media");
+
+                media.initialize(db);
+                media.findOneById(newDocs.id_media, (isFound, message, result) => {
+                    if (isFound) {
+                        var filter = {
+                                "_id": result._id
+                            },
+                            update = {
+                                "$push": {
+                                    "docs": newDocs
+                                }
+                            };
+
+                        collection.value.updateOne(filter, update, (err, resultUp) => {
+                            if (err) {
+                                callback(false, "Une erreur lors de la mise à jour : " + err)
+                            } else {
+                                if (resultUp) {
+                                    callback(true, "La mise à jour a été faites", resultUp)
+                                } else {
+                                    callback(false, "Aucune mise à jour")
+                                }
+                            }
+                        })
+                    } else {
+                        callback(false, message)
+                    }
+                })
+
+            } else {
+                callback(false, message)
+            }
+        })
+    } catch (exception) {
+        callback(false, "Une exception a été lévée lors de la définition de l'avatar : " + exception)
     }
 }

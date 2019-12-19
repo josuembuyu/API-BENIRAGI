@@ -25,3 +25,17 @@ module.exports.Job = function Job() {
         "id_job": String
     }
 }
+
+module.exports.Avatar = function Avatar() {
+    return {
+        "id_user": String,
+        "id_avatar": String
+    }
+}
+
+module.exports.Docs = function Docs() {
+    return {
+        "id_user": String,
+        "id_docs": String
+    }
+}
